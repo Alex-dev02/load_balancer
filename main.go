@@ -1,7 +1,7 @@
 package main
 
-import "fmt"
+import "github.com/Alex-dev02/load_balancer/load_balancer"
 
 func main() {
-	fmt.Print("Hell World!")
+	load_balancer.Hello()
 }
