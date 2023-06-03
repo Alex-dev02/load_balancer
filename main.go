@@ -8,6 +8,6 @@ import (
 func main() {
 	loadbalancer.Hello()
 	var config = new(configparser.Config)
-	config.Init()
+	config.InitFromFile("example.config.json")
 	config.Print()
 }
