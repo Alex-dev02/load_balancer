@@ -31,7 +31,7 @@ func NewConfig() Config {
 	return c
 }
 
-func NewConfigFromFile(configFilePath string) Config {	
+func NewConfigFromFile(configFilePath string) Config {
 	if configFilePath == "" {
 		panic("Config file path can not be empty")
 	}
@@ -82,7 +82,7 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	if value, exists := data["servers"]; exists {
 		if serverURLs, ok := value.([]interface{}); ok && len(serverURLs) > 0 {
 			if _, ok := serverURLs[0].(string); !ok {
-				panic("Server URLs should be of type string in the JSON config file!")
+				panic("servers URLs must be of type string in the JSON config file!")
 			}
 
 			this.serverURLs = make([]string, len(serverURLs))
@@ -96,36 +96,48 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	if value, exists := data["algorithm"]; exists {
 		if algorithm, ok := value.(string); ok {
 			this.balancingAlgorithmName = algorithm
+		} else {
+			panic("algorithm name must be of type string in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["timeoutSeconds"]; exists {
 		if timeoutSeconds, ok := value.(float64); ok {
 			this.serverTimeoutSeconds = int(timeoutSeconds)
+		} else {
+			panic("timeoutSeconds must be of type int in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["failedHealthCheckAttempts"]; exists {
 		if failedHealthCheckAttempts, ok := value.(float64); ok {
 			this.failedHealthChecksTillTimeout = int(failedHealthCheckAttempts)
+		} else {
+			panic("failedHealthCheckAttempts must be of type int in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["slowStart"]; exists {
 		if slowStart, ok := value.(bool); ok {
 			this.slowStart = slowStart
+		} else {
+			panic("slowStart must be of type bool in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["slowStartSeconds"]; exists {
 		if slowStartSeconds, ok := value.(float64); ok {
 			this.slowStartSeconds = int(slowStartSeconds)
+		} else {
+			panic("slowStartSeconds must be of type int in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["stickySession"]; exists {
 		if stickySession, ok := value.(bool); ok {
 			this.stickySession = stickySession
+		} else {
+			panic("stickySession must be of type bool in the JSON config file!")
 		}
 	}
 }
