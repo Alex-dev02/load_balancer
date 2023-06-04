@@ -8,10 +8,10 @@ import (
 )
 
 const defaultConfig = `{
-	"servers": [],
-	"algorithm": "round_robin",
-	"timeoutSeconds": 60,
-	"failedHealthCheckAttempts": 3,
+	"serverURLs": [],
+	"balancingAlgorithmName": "round_robin",
+	"serverTimeoutSeconds": 60,
+	"failedHealthChecksTillTimeout": 3,
 	"slowStart": false,
 	"slowStartSeconds": 120,
 	"stickySession": false
@@ -84,10 +84,10 @@ func unmarshalData(configDataJson []byte) map[string]interface{} {
 }
 
 func (this *Config) populateConfigWithExtractedData(data map[string]interface{}) {
-	if value, exists := data["servers"]; exists {
+	if value, exists := data["serverURLs"]; exists {
 		if serverURLs, ok := value.([]interface{}); ok && len(serverURLs) > 0 {
 			if _, ok := serverURLs[0].(string); !ok {
-				panic("servers URLs must be of type string in the JSON config file!")
+				panic("serverURLs must be of type string in the JSON config file!")
 			}
 
 			this.serverURLs = make([]string, len(serverURLs))
@@ -98,27 +98,27 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 		}
 	}
 
-	if value, exists := data["algorithm"]; exists {
+	if value, exists := data["balancingAlgorithmName"]; exists {
 		if algorithm, ok := value.(string); ok {
 			this.balancingAlgorithmName = algorithm
 		} else {
-			panic("algorithm name must be of type string in the JSON config file!")
+			panic("balancingAlgorithmName must be of type string in the JSON config file!")
 		}
 	}
 
-	if value, exists := data["timeoutSeconds"]; exists {
+	if value, exists := data["serverTimeoutSeconds"]; exists {
 		if timeoutSeconds, ok := value.(float64); ok {
 			this.serverTimeoutSeconds = int(timeoutSeconds)
 		} else {
-			panic("timeoutSeconds must be of type int in the JSON config file!")
+			panic("serverTimeoutSeconds must be of type int in the JSON config file!")
 		}
 	}
 
-	if value, exists := data["failedHealthCheckAttempts"]; exists {
+	if value, exists := data["failedHealthChecksTillTimeout"]; exists {
 		if failedHealthCheckAttempts, ok := value.(float64); ok {
 			this.failedHealthChecksTillTimeout = int(failedHealthCheckAttempts)
 		} else {
-			panic("failedHealthCheckAttempts must be of type int in the JSON config file!")
+			panic("failedHealthChecksTillTimeout must be of type int in the JSON config file!")
 		}
 	}
 
