@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-const defaultConfig = `{
+const defaultConfig string = `{
 	"serverURLs": [],
 	"balancingAlgorithmName": "round_robin",
 	"serverTimeoutSeconds": 60,
