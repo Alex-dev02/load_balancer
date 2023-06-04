@@ -1,3 +1,10 @@
 {
-
+    "servers": [
+        "server1.domain.example",
+        "server2.domain.example",
+        "server3.domain.example"
+    ],
+    "algorith,": "least_connections",
+    "timeoutSeconds": 60,
+    "slowStart": true
 }
