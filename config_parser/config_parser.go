@@ -7,6 +7,16 @@ import (
 	"os"
 )
 
+const defaultConfig = `{
+	"servers": [],
+	"algorithm": "round_robin",
+	"timeoutSeconds": 60,
+	"failedHealthCheckAttempts": 3,
+	"slowStart": false,
+    "slowStartSeconds": 120,
+    "stickySession": false
+}`
+
 type Config struct {
 	serverURLs                    []string
 	balancingAlgorithmName        string
@@ -20,13 +30,8 @@ type Config struct {
 func NewConfig() Config {
 	var c Config
 
-	c.serverURLs = make([]string, 0)
-	c.balancingAlgorithmName = "round_robin"
-	c.serverTimeoutSeconds = 30
-	c.failedHealthChecksTillTimeout = 3
-	c.slowStart = false
-	c.slowStartSeconds = 120
-	c.stickySession = false
+	data := unmarshalData([]byte(defaultConfig))
+	c.populateConfigWithExtractedData(data)
 
 	return c
 }

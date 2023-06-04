@@ -7,6 +7,6 @@ import (
 
 func main() {
 	loadbalancer.Hello()
-	config := configparser.NewConfigFromFile("example.config.json")
+	config := configparser.NewConfig()
 	config.Print()
 }
