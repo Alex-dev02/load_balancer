@@ -17,17 +17,21 @@ type Config struct {
 	stickySession                 bool
 }
 
-func (this *Config) InitDefault() {
-	this.serverURLs = make([]string, 0)
-	this.balancingAlgorithmName = "round_robin"
-	this.serverTimeoutSeconds = 30
-	this.failedHealthChecksTillTimeout = 3
-	this.slowStart = false
-	this.slowStartSeconds = 120
-	this.stickySession = false
+func NewConfig() Config {
+	var c Config
+
+	c.serverURLs = make([]string, 0)
+	c.balancingAlgorithmName = "round_robin"
+	c.serverTimeoutSeconds = 30
+	c.failedHealthChecksTillTimeout = 3
+	c.slowStart = false
+	c.slowStartSeconds = 120
+	c.stickySession = false
+
+	return c
 }
 
-func (this *Config) InitFromFile(configFilePath string) {
+func NewConfigFromFile(configFilePath string) Config {	
 	if configFilePath == "" {
 		panic("Config file path can not be empty")
 	}
@@ -36,8 +40,10 @@ func (this *Config) InitFromFile(configFilePath string) {
 		panic(err.Error())
 	}
 
-	this.InitDefault()
-	this.loadConfigFromFile(configFilePath)
+	c := NewConfig()
+	c.loadConfigFromFile(configFilePath)
+
+	return c
 }
 
 func (this *Config) Print() {
