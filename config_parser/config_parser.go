@@ -13,8 +13,8 @@ const defaultConfig = `{
 	"timeoutSeconds": 60,
 	"failedHealthCheckAttempts": 3,
 	"slowStart": false,
-    "slowStartSeconds": 120,
-    "stickySession": false
+	"slowStartSeconds": 120,
+	"stickySession": false
 }`
 
 type Config struct {
