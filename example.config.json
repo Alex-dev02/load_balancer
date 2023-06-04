@@ -4,7 +4,10 @@
         "server2.domain.example",
         "server3.domain.example"
     ],
-    "algorith,": "least_connections",
+    "algorithm": "least_connections",
     "timeoutSeconds": 60,
-    "slowStart": true
+    "failedHealthCheckAttempts": 3,
+    "slowStart": true,
+    "slowStartSeconds": 120,
+    "stickySession": true
 }

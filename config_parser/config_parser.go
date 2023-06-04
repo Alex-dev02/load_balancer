@@ -87,5 +87,39 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 		}
 	}
 
-	fmt.Print("hi")
+	if value, exists := data["algorithm"]; exists {
+		if algorithm, ok := value.(string); ok {
+			this.balancingAlgorithmName = algorithm
+		}
+	}
+
+	if value, exists := data["timeoutSeconds"]; exists {
+		if timeoutSeconds, ok := value.(float64); ok {
+			this.serverTimeoutSeconds = int(timeoutSeconds)
+		}
+	}
+
+	if value, exists := data["failedHealthCheckAttempts"]; exists {
+		if failedHealthCheckAttempts, ok := value.(float64); ok {
+			this.failedHealthChecksTillTimeout = int(failedHealthCheckAttempts)
+		}
+	}
+
+	if value, exists := data["slowStart"]; exists {
+		if slowStart, ok := value.(bool); ok {
+			this.slowStart = slowStart
+		}
+	}
+
+	if value, exists := data["slowStartSeconds"]; exists {
+		if slowStartSeconds, ok := value.(float64); ok {
+			this.slowStartSeconds = int(slowStartSeconds)
+		}
+	}
+
+	if value, exists := data["stickySession"]; exists {
+		if stickySession, ok := value.(bool); ok {
+			this.stickySession = stickySession
+		}
+	}
 }
