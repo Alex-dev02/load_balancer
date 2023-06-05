@@ -2,9 +2,11 @@ package configparser
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 const defaultConfig string = `{
@@ -27,6 +29,8 @@ type Config struct {
 	stickySession                 bool
 }
 
+// Returns a default new configuration to be used as the settings for
+// the load balancer
 func NewConfig() Config {
 	var c Config
 
@@ -36,7 +40,11 @@ func NewConfig() Config {
 	return c
 }
 
-func NewConfigFromFile(configFilePath string) Config {
+// Returns a custom configuration read from the json file path
+// to be used as the settings for the load balancer
+// Returns a non-fatal error, indicating which unknown fields
+// were found in the configuration file
+func NewConfigFromFile(configFilePath string) (Config, error) {
 	if configFilePath == "" {
 		panic("Config file path can not be empty")
 	}
@@ -46,19 +54,21 @@ func NewConfigFromFile(configFilePath string) Config {
 	}
 
 	c := NewConfig()
-	c.loadConfigFromFile(configFilePath)
+	err := c.loadConfigFromFile(configFilePath)
 
-	return c
+	return c, err
 }
 
 func (this *Config) Print() {
 	fmt.Println(this)
 }
 
-func (this *Config) loadConfigFromFile(configFilePath string) {
+func (this *Config) loadConfigFromFile(configFilePath string) error {
 	configDataJson := extractDataFromFile(configFilePath)
 	data := unmarshalData(configDataJson)
-	this.populateConfigWithExtractedData(data)
+	err := this.populateConfigWithExtractedData(data)
+
+	return err
 }
 
 func extractDataFromFile(configFilePath string) []byte {
@@ -83,8 +93,10 @@ func unmarshalData(configDataJson []byte) map[string]interface{} {
 	return data
 }
 
-func (this *Config) populateConfigWithExtractedData(data map[string]interface{}) {
+func (this *Config) populateConfigWithExtractedData(data map[string]interface{}) error {
 	if value, exists := data["serverURLs"]; exists {
+		delete(data, "serverURLs")
+
 		if serverURLs, ok := value.([]interface{}); ok && len(serverURLs) > 0 {
 			if _, ok := serverURLs[0].(string); !ok {
 				panic("serverURLs must be of type string in the JSON config file!")
@@ -99,6 +111,8 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["balancingAlgorithmName"]; exists {
+		delete(data, "balancingAlgorithmName")
+
 		if algorithm, ok := value.(string); ok {
 			this.balancingAlgorithmName = algorithm
 		} else {
@@ -107,6 +121,8 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["serverTimeoutSeconds"]; exists {
+		delete(data, "serverTimeoutSeconds")
+
 		if timeoutSeconds, ok := value.(float64); ok {
 			this.serverTimeoutSeconds = int(timeoutSeconds)
 		} else {
@@ -115,6 +131,8 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["failedHealthChecksTillTimeout"]; exists {
+		delete(data, "failedHealthChecksTillTimeout")
+
 		if failedHealthCheckAttempts, ok := value.(float64); ok {
 			this.failedHealthChecksTillTimeout = int(failedHealthCheckAttempts)
 		} else {
@@ -123,6 +141,8 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["slowStart"]; exists {
+		delete(data, "slowStart")
+
 		if slowStart, ok := value.(bool); ok {
 			this.slowStart = slowStart
 		} else {
@@ -131,6 +151,8 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["slowStartSeconds"]; exists {
+		delete(data, "slowStartSeconds")
+
 		if slowStartSeconds, ok := value.(float64); ok {
 			this.slowStartSeconds = int(slowStartSeconds)
 		} else {
@@ -139,10 +161,27 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	}
 
 	if value, exists := data["stickySession"]; exists {
+		delete(data, "stickySession")
+
 		if stickySession, ok := value.(bool); ok {
 			this.stickySession = stickySession
 		} else {
 			panic("stickySession must be of type bool in the JSON config file!")
 		}
 	}
+
+	if len(data) > 0 {
+		var unknownKeys strings.Builder
+		for key := range data {
+			_, err := unknownKeys.WriteString(key)
+			_, err2 := unknownKeys.WriteString(" ")
+
+			if err != nil || err2 != nil {
+				panic("Coulnd not write to Builder while processing unknown json fields from config file")
+			}
+		}
+		return errors.New("Non-fatal: Unknown fields found in json config file:\n" + unknownKeys.String())
+	}
+
+	return nil
 }

@@ -31,6 +31,14 @@ func createTemporaryTestFile(text string) error {
 	return nil
 }
 
+func panicCalled() bool {
+	if r := recover(); r != nil {
+		return true
+	}
+
+	return false
+}
+
 func TestNewConfig_FuncResultMatchesDefaultConfigConst(t *testing.T) {
 	inConfig := NewConfig()
 	wantConfig := Config{
@@ -79,7 +87,12 @@ func TestNewConfigFromFile_DefaultConfigProcessedFromFileSameAsDefault(t *testin
 		t.Error(err.Error())
 	}
 
-	inConfig := NewConfigFromFile(configFileName)
+	inConfig, err := NewConfigFromFile(configFileName)
+
+	if err != nil {
+		t.Error("Malformed default configuration read from file.\n" + err.Error())
+	}
+
 	wantConfig := Config{
 		serverURLs:                    nil,
 		balancingAlgorithmName:        "round_robin",
@@ -121,7 +134,12 @@ func TestNewConfigFromFile_CustomConfigProcessedFromFileDifferentThanDefault(t *
 		t.Error(err.Error())
 	}
 
-	inConfig := NewConfigFromFile(configFileName)
+	inConfig, err := NewConfigFromFile(configFileName)
+
+	if err != nil {
+		t.Error("Malformed default configuration read from file.\n" + err.Error())
+	}
+
 	differentConfig := Config{
 		serverURLs:                    nil,
 		balancingAlgorithmName:        "round_robin",
@@ -141,4 +159,73 @@ func TestNewConfigFromFile_CustomConfigProcessedFromFileDifferentThanDefault(t *
 	if err != nil {
 		t.Error("Failed to remove temporary test file")
 	}
+}
+
+func TestNewConfigFromFile_ReturnNonFatalErrorOnMalformedConfigFile(t *testing.T) {
+	const customConfig string = `{
+		"serverURLs": [
+			"backend1.url.com",
+			"backedn2.url.com"
+		],
+		"balancingAlgorithmName": "w_round_robit",
+		"serverTimeoutSeconds": 120,
+		"failedHealthChecksTillTimeout": 3,
+		"slowStart": false,
+		"slowStartSeconds": 120,
+		"unknownField": true
+	}`
+
+	err := createTemporaryTestFile(customConfig)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	_, err = NewConfigFromFile(configFileName)
+
+	if err == nil {
+		t.Errorf("Not nil error expected when processing config file with an unknown field")
+	}
+
+	err = os.Remove(configFileName)
+
+	if err != nil {
+		t.Error("Failed to remove temporary test file")
+	}
+}
+
+func TestNewConfigFromFile_ErrorOnConfigFileFieldWithMismatchedValue(t *testing.T) {	
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("Panic expected due to malformed json config file field \"serverTimeoutSeconds\"")
+		}
+	}()
+
+	defer func() {
+		err := os.Remove(configFileName)
+
+			if err != nil {
+				t.Error("Failed to remove temporary test file")
+			}
+	}()
+	
+	const customConfig string = `{
+		"serverURLs": [
+			"backend1.url.com",
+			"backedn2.url.com"
+		],
+		"balancingAlgorithmName": "w_round_robit",
+		"serverTimeoutSeconds": true,
+		"failedHealthChecksTillTimeout": 3,
+		"slowStart": false,
+		"slowStartSeconds": 120
+	}`
+
+	err := createTemporaryTestFile(customConfig)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	_, err = NewConfigFromFile(configFileName)
 }
