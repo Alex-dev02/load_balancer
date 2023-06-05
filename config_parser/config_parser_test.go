@@ -31,14 +31,6 @@ func createTemporaryTestFile(text string) error {
 	return nil
 }
 
-func panicCalled() bool {
-	if r := recover(); r != nil {
-		return true
-	}
-
-	return false
-}
-
 func TestNewConfig_FuncResultMatchesDefaultConfigConst(t *testing.T) {
 	inConfig := NewConfig()
 	wantConfig := Config{
