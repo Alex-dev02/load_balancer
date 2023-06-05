@@ -31,6 +31,14 @@ func createTemporaryTestFile(text string) error {
 	return nil
 }
 
+func cleanUpFile(fileName string) {
+	err := os.Remove(configFileName)
+
+	if err != nil {
+		panic("Could not remove file " + fileName)
+	}
+}
+
 func TestNewConfig_FuncResultMatchesDefaultConfigConst(t *testing.T) {
 	inConfig := NewConfig()
 	wantConfig := Config{
@@ -74,6 +82,7 @@ func TestNewConfig_FuncResultDifferentThanCustomConfig(t *testing.T) {
 
 func TestNewConfigFromFile_DefaultConfigProcessedFromFileSameAsDefault(t *testing.T) {
 	err := createTemporaryTestFile(defaultConfig)
+	defer cleanUpFile(configFileName)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -98,12 +107,6 @@ func TestNewConfigFromFile_DefaultConfigProcessedFromFileSameAsDefault(t *testin
 	if !reflect.DeepEqual(inConfig, wantConfig) {
 		t.Errorf("TestNewConfig() == \n%+v\nwant \n%+v\n", inConfig, wantConfig)
 	}
-
-	err = os.Remove(configFileName)
-
-	if err != nil {
-		t.Error("Failed to remove temporary test file")
-	}
 }
 
 func TestNewConfigFromFile_CustomConfigProcessedFromFileDifferentThanDefault(t *testing.T) {
@@ -121,6 +124,7 @@ func TestNewConfigFromFile_CustomConfigProcessedFromFileDifferentThanDefault(t *
 	}`
 
 	err := createTemporaryTestFile(customConfig)
+	defer cleanUpFile(configFileName)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -145,12 +149,6 @@ func TestNewConfigFromFile_CustomConfigProcessedFromFileDifferentThanDefault(t *
 	if reflect.DeepEqual(inConfig, differentConfig) {
 		t.Errorf("TestNewConfig() == \n%+v\nEXPECTED NOT EQUAL WITH\n%+v\n", inConfig, differentConfig)
 	}
-
-	err = os.Remove(configFileName)
-
-	if err != nil {
-		t.Error("Failed to remove temporary test file")
-	}
 }
 
 func TestNewConfigFromFile_ReturnNonFatalErrorOnMalformedConfigFile(t *testing.T) {
@@ -168,6 +166,7 @@ func TestNewConfigFromFile_ReturnNonFatalErrorOnMalformedConfigFile(t *testing.T
 	}`
 
 	err := createTemporaryTestFile(customConfig)
+	defer cleanUpFile(configFileName)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -178,29 +177,16 @@ func TestNewConfigFromFile_ReturnNonFatalErrorOnMalformedConfigFile(t *testing.T
 	if err == nil {
 		t.Errorf("Not nil error expected when processing config file with an unknown field")
 	}
-
-	err = os.Remove(configFileName)
-
-	if err != nil {
-		t.Error("Failed to remove temporary test file")
-	}
 }
 
-func TestNewConfigFromFile_ErrorOnConfigFileFieldWithMismatchedValue(t *testing.T) {	
+func TestNewConfigFromFile_ErrorOnConfigFileFieldWithMismatchedValue(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
 			t.Error("Panic expected due to malformed json config file field \"serverTimeoutSeconds\"")
 		}
 	}()
+	defer cleanUpFile(configFileName)
 
-	defer func() {
-		err := os.Remove(configFileName)
-
-			if err != nil {
-				t.Error("Failed to remove temporary test file")
-			}
-	}()
-	
 	const customConfig string = `{
 		"serverURLs": [
 			"backend1.url.com",
