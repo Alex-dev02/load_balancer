@@ -24,10 +24,10 @@ const defaultConfig string = `{
 type Config struct {
 	serverURLs                    []string
 	balancingAlgorithmName        string
-	serverTimeoutSeconds          int
-	failedHealthChecksTillTimeout int
+	serverTimeoutSeconds          uint
+	failedHealthChecksTillTimeout uint
 	slowStart                     bool
-	slowStartSeconds              int
+	slowStartSeconds              uint
 	stickySession                 bool
 }
 
@@ -124,20 +124,20 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	if value, exists := data["serverTimeoutSeconds"]; exists {
 		delete(data, "serverTimeoutSeconds")
 
-		if timeoutSeconds, ok := value.(float64); ok {
-			this.serverTimeoutSeconds = int(timeoutSeconds)
+		if timeoutSeconds, ok := value.(float64); ok && timeoutSeconds >= 0{
+			this.serverTimeoutSeconds = uint(timeoutSeconds)
 		} else {
-			panic("serverTimeoutSeconds must be of type int in the JSON config file!")
+			panic("serverTimeoutSeconds must be of type uint in the JSON config file!")
 		}
 	}
 
 	if value, exists := data["failedHealthChecksTillTimeout"]; exists {
 		delete(data, "failedHealthChecksTillTimeout")
 
-		if failedHealthCheckAttempts, ok := value.(float64); ok {
-			this.failedHealthChecksTillTimeout = int(failedHealthCheckAttempts)
+		if failedHealthCheckAttempts, ok := value.(float64); ok && failedHealthCheckAttempts >= 0 {
+			this.failedHealthChecksTillTimeout = uint(failedHealthCheckAttempts)
 		} else {
-			panic("failedHealthChecksTillTimeout must be of type int in the JSON config file!")
+			panic("failedHealthChecksTillTimeout must be of type uint in the JSON config file!")
 		}
 	}
 
@@ -154,10 +154,10 @@ func (this *Config) populateConfigWithExtractedData(data map[string]interface{})
 	if value, exists := data["slowStartSeconds"]; exists {
 		delete(data, "slowStartSeconds")
 
-		if slowStartSeconds, ok := value.(float64); ok {
-			this.slowStartSeconds = int(slowStartSeconds)
+		if slowStartSeconds, ok := value.(float64); ok && slowStartSeconds >= 0 {
+			this.slowStartSeconds = uint(slowStartSeconds)
 		} else {
-			panic("slowStartSeconds must be of type int in the JSON config file!")
+			panic("slowStartSeconds must be of type uint in the JSON config file!")
 		}
 	}
 
