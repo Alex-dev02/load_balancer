@@ -19,6 +19,8 @@ const defaultConfig string = `{
 	"stickySession": false
 }`
 
+// Config struct encapsulates all the needed configuration data in order for a load balancer
+// to work properly. It is also used for enabling/disabling certain non-vital features
 type Config struct {
 	serverURLs                    []string
 	balancingAlgorithmName        string
@@ -29,8 +31,8 @@ type Config struct {
 	stickySession                 bool
 }
 
-// Returns a default new configuration to be used as the settings for
-// the load balancer
+// NewConfig initializes the Config struct with a predefined default configuration.
+// It returns the initialized Config struct
 func NewConfig() Config {
 	var c Config
 
@@ -40,10 +42,9 @@ func NewConfig() Config {
 	return c
 }
 
-// Returns a custom configuration read from the json file path
-// to be used as the settings for the load balancer
-// Returns a non-fatal error, indicating which unknown fields
-// were found in the configuration file
+// NewConfigFromFile initializes the Config struct with a custom configuration
+// prvided in the specified file.
+// It returns the initialized Config struct and an error in case the data validation went wrong
 func NewConfigFromFile(configFilePath string) (Config, error) {
 	if configFilePath == "" {
 		panic("Config file path can not be empty")
