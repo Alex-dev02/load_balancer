@@ -1,13 +1,13 @@
 {
-    "servers": [
+    "serverURLs": [
         "server1.domain.example",
         "server2.domain.example",
         "server3.domain.example"
     ],
-    "algorithm": "least_connections",
-    "timeoutSeconds": 60,
-    "failedHealthCheckAttempts": 3,
+    "balancingAlgorithmName": "least_connections",
+    "serverTimeoutSeconds": 60,
+    "failedHealthChecksTillTimeout": 3,
     "slowStart": true,
-    "slowStartSeconds": 120,
+    "slowStartSeconds": 20,
     "stickySession": true
 }
